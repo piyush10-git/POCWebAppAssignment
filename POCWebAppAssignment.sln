@@ -1,0 +1,49 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36121.58
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "POCWebAppAssignment.API", "POCWebAppAssignment.Backend\POCWebAppAssignment.API.csproj", "{7ADCA742-BB2E-4096-8731-390A89E20FAA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "POCWebAppAssignment.Orchestration", "POCWebAppAssignment.Orchestration\POCWebAppAssignment.Orchestration.csproj", "{F2D4497B-58B8-4ED4-BAB1-523FFB55956B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "POCWebAppAssignment.Repository", "POCWebAppAssignment.Repository\POCWebAppAssignment.Repository.csproj", "{F0D5D56B-651D-44B3-91A0-4484D22DFA8C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "POCWebAppAssignment.Model", "POCWebAppAssignment.Model\POCWebAppAssignment.Model.csproj", "{41173C4B-6833-437F-BF96-E3E7B5CB9351}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "POCWebAppAssignment.Interfaces", "POCWebAppAssignment.Interfaces\POCWebAppAssignment.Interfaces.csproj", "{EE34694B-E24E-4B79-8169-CF327B1F33BC}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{7ADCA742-BB2E-4096-8731-390A89E20FAA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7ADCA742-BB2E-4096-8731-390A89E20FAA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7ADCA742-BB2E-4096-8731-390A89E20FAA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7ADCA742-BB2E-4096-8731-390A89E20FAA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F2D4497B-58B8-4ED4-BAB1-523FFB55956B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F2D4497B-58B8-4ED4-BAB1-523FFB55956B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F2D4497B-58B8-4ED4-BAB1-523FFB55956B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F2D4497B-58B8-4ED4-BAB1-523FFB55956B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F0D5D56B-651D-44B3-91A0-4484D22DFA8C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F0D5D56B-651D-44B3-91A0-4484D22DFA8C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F0D5D56B-651D-44B3-91A0-4484D22DFA8C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F0D5D56B-651D-44B3-91A0-4484D22DFA8C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{41173C4B-6833-437F-BF96-E3E7B5CB9351}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{41173C4B-6833-437F-BF96-E3E7B5CB9351}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{41173C4B-6833-437F-BF96-E3E7B5CB9351}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{41173C4B-6833-437F-BF96-E3E7B5CB9351}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EE34694B-E24E-4B79-8169-CF327B1F33BC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EE34694B-E24E-4B79-8169-CF327B1F33BC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EE34694B-E24E-4B79-8169-CF327B1F33BC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EE34694B-E24E-4B79-8169-CF327B1F33BC}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {632AB1F4-FEAD-4700-871F-F3E7DC3EC71E}
+	EndGlobalSection
+EndGlobal
