@@ -150,5 +150,10 @@ namespace POCWebAppAssignment.Orchestration.Services
                 throw;
             }
         }
+
+        public async Task BulkCreateResourcesAsync(List<ResourceDto> resources)
+        {
+            await _resourceRepository.BulkCreateResourcesAsync(resources);
+        }
     }
 }

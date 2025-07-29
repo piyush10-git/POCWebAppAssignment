@@ -1,9 +1,10 @@
 ﻿using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using POCWebAppAssignment.API.Utilities;
+using POCWebAppAssignment.Interfaces;
 using POCWebAppAssignment.Model;
 using POCWebAppAssignment.Model.DTOs;
-using POCWebAppAssignment.Interfaces;
+using POCWebAppAssignment.Repository.RunStoredProcedures;
 
 namespace POCWebAppAssignment.API.Controllers
 {
@@ -260,14 +261,15 @@ namespace POCWebAppAssignment.API.Controllers
 
                 var empIdList = new List<int>();
 
-                foreach (var resource in dataList)
-                {
-                    _logger.LogDebug("ImportExcelDataAsync: Importing resource with preliminary data: {@Resource}", resource);
-                    int empId = await _resourceService.CreateResourceAsync(resource);
-                    empIdList.Add(empId);
-                }
+                //foreach (var resource in dataList)
+                //{
+                //    _logger.LogDebug("ImportExcelDataAsync: Importing resource with preliminary data: {@Resource}", resource);
+                //    int empId = await _resourceService.CreateResourceAsync(resource);
+                //    empIdList.Add(empId);
+                //}
+                await _resourceService.BulkCreateResourcesAsync(dataList);
 
-                _logger.LogInformation("ImportExcelDataAsync: Successfully imported {Count} resources.", empIdList.Count);
+        _logger.LogInformation("ImportExcelDataAsync: Successfully imported {Count} resources.", empIdList.Count);
 
                 var response = new ApiResponse<List<int>>(true, "Excel import successful", empIdList);
                 return Ok(response);

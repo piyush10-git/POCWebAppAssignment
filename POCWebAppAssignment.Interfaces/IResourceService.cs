@@ -15,5 +15,7 @@ namespace POCWebAppAssignment.Interfaces
         Task DeleteResourcesByEmpIdListAsync(List<int> empIds);
         Task<DropdownResponseDto> GetDropdownDataAsync();
         Task<int> BulkUpdateResourcesAsync(BulkEditDto bulkEditDetails);
+        Task BulkCreateResourcesAsync(List<ResourceDto> resources);
+
     }
 }

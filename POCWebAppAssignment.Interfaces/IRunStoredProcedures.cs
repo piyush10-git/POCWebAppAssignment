@@ -17,5 +17,6 @@ namespace POCWebAppAssignment.Interfaces
         Task<IEnumerable<int>> GetResourceStatistics();
         Task<bool> CheckEmailExists(string emailId);
         Task DeleteResourcesByEmpIdList(IEnumerable<int> empIds);
+        //Task BulkCreateResourcesAsync(IEnumerable<Resource> resources);
     }
 }

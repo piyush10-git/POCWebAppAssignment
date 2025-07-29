@@ -155,5 +155,10 @@ namespace POCWebAppAssignment.Repository.Repositories
             }
         }
 
+        public async Task BulkCreateResourcesAsync(List<ResourceDto> resources)
+        {
+            await _runStoredProcedures.BulkCreateResourcesAsync(resources);
+        }
+
     }
 }
