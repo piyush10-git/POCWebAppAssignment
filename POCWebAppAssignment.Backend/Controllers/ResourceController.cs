@@ -255,12 +255,6 @@ namespace POCWebAppAssignment.API.Controllers
             {
                 var empIdList = new List<int>();
 
-                //foreach (var resource in dataList)
-                //{
-                //    _logger.LogDebug("ImportExcelDataAsync: Importing resource with preliminary data: {@Resource}", resource);
-                //    int empId = await _resourceService.CreateResourceAsync(resource);
-                //    empIdList.Add(empId);
-                //}
                 await _resourceService.BulkCreateResourcesAsync(dataList);
 
         _logger.LogInformation("ImportExcelDataAsync: Successfully imported {Count} resources.", empIdList.Count);
