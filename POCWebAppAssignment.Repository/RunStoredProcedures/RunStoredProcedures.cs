@@ -273,7 +273,7 @@ namespace POCWebAppAssignment.Repository.RunStoredProcedures
             employeesTable.Columns.Add("Billable", typeof(bool));
             employeesTable.Columns.Add("LocationId", typeof(int));
             employeesTable.Columns.Add("EmailId", typeof(string));
-            employeesTable.Columns.Add("CteDoj", typeof(DateTime));
+            employeesTable.Columns.Add("CteDoj", typeof(DateOnly));
             employeesTable.Columns.Add("Remarks", typeof(string));
 
             var skillsTable = new DataTable();

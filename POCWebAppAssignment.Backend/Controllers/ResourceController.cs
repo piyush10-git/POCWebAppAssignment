@@ -29,7 +29,6 @@ namespace POCWebAppAssignment.API.Controllers
             _logger.LogInformation("Fetching all resources.");
             try
             {
-                await Task.Delay(500);
                 var allResources = await _resourceService.GetAllResourcesAsync();
                 var response = new ApiResponse<IEnumerable<Resource>>(true, "Resource Data", allResources);
 
@@ -176,7 +175,6 @@ namespace POCWebAppAssignment.API.Controllers
 
             try
             {
-                await Task.Delay(2000);
                 Console.WriteLine("request made");
                 var result = await _resourceService.GetResourceStatisticsAsync();
                 _logger.LogInformation("Resource statistics fetched successfully.");
@@ -199,7 +197,6 @@ namespace POCWebAppAssignment.API.Controllers
 
             try
             {
-                await Task.Delay(1000);
                 bool doesExist = await _resourceService.CheckEmailExistsAsync(emailId);
 
                 if (doesExist)
@@ -230,7 +227,6 @@ namespace POCWebAppAssignment.API.Controllers
 
             try
             {
-                await Task.Delay(1000); // Simulated delay, if needed
                 var dropdownData = await _resourceService.GetDropdownDataAsync();
                 var response = new ApiResponse<DropdownResponseDto>(true, "Dropdown options retrieved successfully", dropdownData);
                 return Ok(response);
@@ -257,8 +253,6 @@ namespace POCWebAppAssignment.API.Controllers
 
             try
             {
-                await Task.Delay(1000); // Simulated delay
-
                 var empIdList = new List<int>();
 
                 //foreach (var resource in dataList)
