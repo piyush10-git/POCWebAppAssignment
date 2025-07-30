@@ -448,6 +448,37 @@ namespace POCWebAppAssignment.Repository.RunStoredProcedures
             await command.ExecuteNonQueryAsync();
         }
 
+        public async Task<List<OptionDto>?> GetRoleOptionsDropDownAsync()
+        {
+            using var conn = new SqlConnection(_connectionString);
+            using var command = new SqlCommand("sp_GetRoleOptions", conn)
+            {
+                CommandType = CommandType.StoredProcedure
+            };
+
+            var result = new SqlParameter("@result", SqlDbType.NVarChar, -1)
+            {
+                Direction = ParameterDirection.Output
+            };
+            command.Parameters.Add(result);
+
+            await conn.OpenAsync();
+            await command.ExecuteNonQueryAsync();
+
+            //string json = Convert.ToString(result.Value);
+            string json = (string)result.Value;
+
+            if (!string.IsNullOrWhiteSpace(json))
+            {
+                var value = JsonSerializer.Deserialize<List<OptionDto>>(json, new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                });;
+                return value;
+            }
+
+            return new List<OptionDto>();
+        }
 
 
     }

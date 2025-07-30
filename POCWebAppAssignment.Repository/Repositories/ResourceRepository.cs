@@ -160,5 +160,10 @@ namespace POCWebAppAssignment.Repository.Repositories
             await _runStoredProcedures.BulkCreateResourcesAsync(resources);
         }
 
+        public async Task<List<OptionDto>?> GetRoleOptionsDropDownAsync()
+        {
+            return await _runStoredProcedures.GetRoleOptionsDropDownAsync();
+        }
+
     }
 }

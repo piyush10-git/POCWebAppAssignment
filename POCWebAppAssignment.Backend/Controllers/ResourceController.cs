@@ -310,6 +310,22 @@ namespace POCWebAppAssignment.API.Controllers
             }
         }
 
+        [HttpGet("role-options")]
+        public async Task<IActionResult> GetRoleOptions()
+        {
+            try
+            {
+                var result = await _resourceService.GetRoleOptionsDropDownAsync();
+                if (result == null) throw new Exception();
+                var response = new ApiResponse<List<OptionDto>>(true, "Fetched Role options successfull", result);
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                var response = new ApiResponse<string>(false, "something went wrong while fetching role options", null);
+                return StatusCode(500, response);
+            }
+        }
 
 
     }

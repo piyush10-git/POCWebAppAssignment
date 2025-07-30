@@ -155,5 +155,10 @@ namespace POCWebAppAssignment.Orchestration.Services
         {
             await _resourceRepository.BulkCreateResourcesAsync(resources);
         }
+
+        public async Task<List<OptionDto>?> GetRoleOptionsDropDownAsync()
+        {
+            return await _resourceRepository.GetRoleOptionsDropDownAsync();
+        }
     }
 }

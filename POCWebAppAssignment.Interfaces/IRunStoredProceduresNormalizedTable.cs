@@ -18,6 +18,7 @@ namespace POCWebAppAssignment.Interfaces
         Task<DropdownResponseDto> GetDropdownData();
         Task<int> BulkUpdateResources(BulkEditDto bulkEditDetails);
         Task BulkCreateResourcesAsync(List<ResourceDto> resources);
+        Task<List<OptionDto>?> GetRoleOptionsDropDownAsync();
 
     }
 }
