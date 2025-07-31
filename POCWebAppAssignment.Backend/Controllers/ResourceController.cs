@@ -240,7 +240,7 @@ namespace POCWebAppAssignment.API.Controllers
             }
         }
 
-        [HttpPost("import-excel-data")]
+        [HttpPost("bulk-import-data")]
         public async Task<IActionResult> ImportExcelDataAsync([FromBody] List<ResourceDto> dataList)
         {
             if (dataList == null || !dataList.Any())
@@ -257,7 +257,7 @@ namespace POCWebAppAssignment.API.Controllers
 
                 await _resourceService.BulkCreateResourcesAsync(dataList);
 
-        _logger.LogInformation("ImportExcelDataAsync: Successfully imported {Count} resources.", empIdList.Count);
+                _logger.LogInformation("ImportExcelDataAsync: Successfully imported {Count} resources.", empIdList.Count);
 
                 var response = new ApiResponse<List<int>>(true, "Excel import successful", empIdList);
                 return Ok(response);
