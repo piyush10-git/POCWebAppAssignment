@@ -15,7 +15,7 @@ namespace POCWebAppAssignment.Repository.RunStoredProcedures
     public class RunStoredProceduresNormalizedTable : IRunStoredProceduresNormalizedTable
     {
         private readonly string _connectionString;
-        public RunStoredProceduresNormalizedTable(IConfiguration configuration)
+         public RunStoredProceduresNormalizedTable(IConfiguration configuration)
         {
             _connectionString = configuration.GetConnectionString("DB_Connection");
         }
@@ -374,78 +374,86 @@ namespace POCWebAppAssignment.Repository.RunStoredProcedures
 
         public async Task BulkCreateResourcesAsync(List<ResourceDto> resources)
         {
-            var employeesTable = new DataTable();
-            employeesTable.Columns.Add("TempKey", typeof(Guid));
-            employeesTable.Columns.Add("ResourceName", typeof(string));
-            employeesTable.Columns.Add("DesignationId", typeof(int));
-            employeesTable.Columns.Add("ReportingTo", typeof(string));
-            employeesTable.Columns.Add("Billable", typeof(bool));
-            employeesTable.Columns.Add("LocationId", typeof(int));
-            employeesTable.Columns.Add("EmailId", typeof(string));
-            employeesTable.Columns.Add("CteDoj", typeof(DateTime));
-            employeesTable.Columns.Add("Remarks", typeof(string));
-
-            var skillsTable = new DataTable();
-            skillsTable.Columns.Add("TempKey", typeof(Guid));
-            skillsTable.Columns.Add("SkillId", typeof(int));
-
-            var projectsTable = new DataTable();
-            projectsTable.Columns.Add("TempKey", typeof(Guid));
-            projectsTable.Columns.Add("ProjectId", typeof(int));
-
-            foreach (var resource in resources)
+            try
             {
-                var tempKey = Guid.NewGuid();
+                var employeesTable = new DataTable();
+                employeesTable.Columns.Add("TempKey", typeof(Guid));
+                employeesTable.Columns.Add("ResourceName", typeof(string));
+                employeesTable.Columns.Add("DesignationId", typeof(int));
+                employeesTable.Columns.Add("ReportingTo", typeof(string));
+                employeesTable.Columns.Add("Billable", typeof(bool));
+                employeesTable.Columns.Add("LocationId", typeof(int));
+                employeesTable.Columns.Add("EmailId", typeof(string));
+                employeesTable.Columns.Add("CteDoj", typeof(DateTime));
+                employeesTable.Columns.Add("Remarks", typeof(string));
 
-                employeesTable.Rows.Add(
-                    tempKey,
-                    resource.ResourceName,
-                    resource.Designation,
-                    resource.ReportingTo ?? (object)DBNull.Value,
-                    resource.Billable,
-                    resource.Location,
-                    resource.EmailId,
-                    resource.CteDoj.ToDateTime(new TimeOnly(0, 0)),
-                    resource.Remarks ?? string.Empty
-                );
+                var skillsTable = new DataTable();
+                skillsTable.Columns.Add("TempKey", typeof(Guid));
+                skillsTable.Columns.Add("SkillId", typeof(int));
 
-                if (resource.TechnologySkill != null)
+                var projectsTable = new DataTable();
+                projectsTable.Columns.Add("TempKey", typeof(Guid));
+                projectsTable.Columns.Add("ProjectId", typeof(int));
+
+                foreach (var resource in resources)
                 {
-                    foreach (var skillId in resource.TechnologySkill)
+                    var tempKey = Guid.NewGuid();
+
+                    employeesTable.Rows.Add(
+                        tempKey,
+                        resource.ResourceName,
+                        resource.Designation,
+                        resource.ReportingTo ?? (object)DBNull.Value,
+                        resource.Billable,
+                        resource.Location,
+                        resource.EmailId,
+                        resource.CteDoj.ToDateTime(new TimeOnly(0, 0)),
+                        resource.Remarks ?? string.Empty
+                    );
+
+                    if (resource.TechnologySkill != null)
                     {
-                        skillsTable.Rows.Add(tempKey, skillId);
+                        foreach (var skillId in resource.TechnologySkill)
+                        {
+                            skillsTable.Rows.Add(tempKey, skillId);
+                        }
+                    }
+
+                    if (resource.ProjectAllocation != null)
+                    {
+                        foreach (var projectId in resource.ProjectAllocation)
+                        {
+                            projectsTable.Rows.Add(tempKey, projectId);
+                        }
                     }
                 }
 
-                if (resource.ProjectAllocation != null)
+                using var connection = new SqlConnection(_connectionString);
+                using var command = new SqlCommand("sp_BulkImport", connection)
                 {
-                    foreach (var projectId in resource.ProjectAllocation)
-                    {
-                        projectsTable.Rows.Add(tempKey, projectId);
-                    }
-                }
+                    CommandType = CommandType.StoredProcedure
+                };
+
+                var employeesParam = command.Parameters.AddWithValue("@Employees", employeesTable);
+                employeesParam.SqlDbType = SqlDbType.Structured;
+                employeesParam.TypeName = "dbo.TempEmployee";
+
+                var skillsParam = command.Parameters.AddWithValue("@Skills", skillsTable);
+                skillsParam.SqlDbType = SqlDbType.Structured;
+                skillsParam.TypeName = "dbo.TempEmployeeSkills";
+
+                var projectsParam = command.Parameters.AddWithValue("@Projects", projectsTable);
+                projectsParam.SqlDbType = SqlDbType.Structured;
+                projectsParam.TypeName = "dbo.TempProjectAllocation";
+
+                await connection.OpenAsync();
+                await command.ExecuteNonQueryAsync();
             }
-
-            using var connection = new SqlConnection(_connectionString);
-            using var command = new SqlCommand("sp_BulkImport", connection)
+            catch (Exception ex)
             {
-                CommandType = CommandType.StoredProcedure
-            };
-
-            var employeesParam = command.Parameters.AddWithValue("@Employees", employeesTable);
-            employeesParam.SqlDbType = SqlDbType.Structured;
-            employeesParam.TypeName = "dbo.TempEmployee";
-
-            var skillsParam = command.Parameters.AddWithValue("@Skills", skillsTable);
-            skillsParam.SqlDbType = SqlDbType.Structured;
-            skillsParam.TypeName = "dbo.TempEmployeeSkills";
-
-            var projectsParam = command.Parameters.AddWithValue("@Projects", projectsTable);
-            projectsParam.SqlDbType = SqlDbType.Structured;
-            projectsParam.TypeName = "dbo.TempProjectAllocation";
-
-            await connection.OpenAsync();
-            await command.ExecuteNonQueryAsync();
+                Console.WriteLine(ex);
+                throw;
+            }
         }
 
         public async Task<List<OptionDto>?> GetRoleOptionsDropDownAsync()

@@ -157,7 +157,16 @@ namespace POCWebAppAssignment.Repository.Repositories
 
         public async Task BulkCreateResourcesAsync(List<ResourceDto> resources)
         {
-            await _runStoredProcedures.BulkCreateResourcesAsync(resources);
+            try
+            {
+                _logger.LogInformation("Createing bulk resources.");
+                await _runStoredProcedures.BulkCreateResourcesAsync(resources);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error creating {#resources} resources with ID {EmpIds}.", resources.Count.ToString());
+                throw;
+            }
         }
 
         public async Task<List<OptionDto>?> GetRoleOptionsDropDownAsync()

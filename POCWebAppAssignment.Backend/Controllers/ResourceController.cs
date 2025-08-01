@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Data.SqlClient;
 using POCWebAppAssignment.API.Utilities;
 using POCWebAppAssignment.Interfaces;
 using POCWebAppAssignment.Model;
@@ -262,10 +263,15 @@ namespace POCWebAppAssignment.API.Controllers
                 var response = new ApiResponse<List<int>>(true, "Excel import successful", empIdList);
                 return Ok(response);
             }
+            catch (SqlException ex) when (ex.Number == 2627)
+            {
+                // 2627 = UNIQUE constraint violation
+                return StatusCode(500, new ApiResponse<string>(false,"Duplicate emailId found.", null));
+            }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "ImportExcelDataAsync: Error occurred during Excel import.");
-                var response = new ApiResponse<string>(false, "An error occurred while importing data: " + ex.Message, null);
+                var response = new ApiResponse<string>(false, "An error occurred while importing data: " + ex.Message , null);
                 return StatusCode(500, response);
             }
         }
