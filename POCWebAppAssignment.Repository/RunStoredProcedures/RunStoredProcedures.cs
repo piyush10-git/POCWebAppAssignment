@@ -318,7 +318,7 @@ namespace POCWebAppAssignment.Repository.RunStoredProcedures
             }
 
             using var connection = new SqlConnection(_connectionString);
-            using var command = new SqlCommand("sp_BulkImport", connection)
+            using var command = new SqlCommand("sp_BulkImport1", connection)
             {
                 CommandType = CommandType.StoredProcedure
             };
