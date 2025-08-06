@@ -34,7 +34,7 @@ namespace POCWebAppAssignment.Orchestration.Services
                 audience = _config["Jwt:Audience"] ?? throw new InvalidOperationException("JWT audience not configured."),
                 expiresIn = _config["Jwt:ExpiresInMinutes"] ?? throw new InvalidOperationException("JWT expiration not configured."),
             };
-        }   
+        }
 
         public async Task<int?> SignUpAsync(SignupDto signup)
         {
@@ -78,15 +78,6 @@ namespace POCWebAppAssignment.Orchestration.Services
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
-
-        //private string HashPassword(string password)
-        //{
-        //    using var sha = SHA256.Create();
-        //    var bytes = Encoding.UTF8.GetBytes(password);
-        //    var hash = sha.ComputeHash(bytes);
-        //    return Convert.ToBase64String(hash);
-        //}
-
         private string HashPassword(string password)
         {
             using var sha = SHA256.Create();
@@ -94,23 +85,5 @@ namespace POCWebAppAssignment.Orchestration.Services
             var hash = sha.ComputeHash(bytes);
             return Convert.ToBase64String(hash);
         }
-
-
-        //private string HashPassword(string password)
-        //{
-        //    using var rng = RandomNumberGenerator.Create();
-        //    byte[] salt = new byte[16];
-        //    rng.GetBytes(salt);
-
-        //    using var pbkdf2 = new Rfc2898DeriveBytes(password, salt, 10000);
-        //    byte[] hash = pbkdf2.GetBytes(20);
-
-        //    byte[] hashBytes = new byte[36];
-        //    Array.Copy(salt, 0, hashBytes, 0, 16);
-        //    Array.Copy(hash, 0, hashBytes, 16, 20);
-
-        //    return Convert.ToBase64String(hashBytes);
-        //}
-
     }
 }

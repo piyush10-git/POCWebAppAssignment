@@ -1,15 +1,13 @@
-﻿using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using POCWebAppAssignment.API.Utilities;
 using POCWebAppAssignment.Interfaces;
 using POCWebAppAssignment.Model;
 using POCWebAppAssignment.Model.DTOs;
-using POCWebAppAssignment.Repository.RunStoredProcedures;
 
 namespace POCWebAppAssignment.API.Controllers
 {
-    [Route("resources")]
+    [Route("api/resources")]
     [ApiController]
     public class ResourceController : ControllerBase
     {

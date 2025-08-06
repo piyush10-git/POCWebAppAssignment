@@ -4,6 +4,7 @@ using POCWebAppAssignment.Interfaces;
 using POCWebAppAssignment.Interfaces.Authentication;
 using POCWebAppAssignment.Repository.Repositories;
 using POCWebAppAssignment.Repository.RunStoredProcedures;
+using Microsoft.AspNetCore.Authentication;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -21,10 +22,21 @@ builder.Services.AddTransient<IAuthStoredProcedures, AuthStoredProcedures>();
 builder.Services.AddTransient<IAuthRepository, AuthRepository>();
 builder.Services.AddTransient<IAuthService, AuthService>();
 
-// DI
+// Registering dependencies
 builder.Services.AddTransient<IRunStoredProceduresNormalizedTable, RunStoredProceduresNormalizedTable>();
 builder.Services.AddTransient<IResourceRepository, ResourceRepository>();
 builder.Services.AddTransient<IResourceService, ResourceService>();
+
+// JWT setting from configuration
+var jwtKey = builder.Configuration["Jwt:Key"];
+var jwtIssuer = builder.Configuration["Jwt:Issuer"];
+var jwtAudience = builder.Configuration["Jwt:Audience"];
+
+//builder.Services.AddAuthentication(option =>
+//{
+//    option.DefaultAuthenticateScheme
+//})
+
 
 builder.Services.AddControllers();
 builder.Host.UseSerilog();

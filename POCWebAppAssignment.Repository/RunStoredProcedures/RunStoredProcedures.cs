@@ -3,10 +3,7 @@ using Microsoft.Extensions.Configuration;
 using POCWebAppAssignment.Interfaces;
 using POCWebAppAssignment.Model;
 using POCWebAppAssignment.Model.DTOs;
-using System;
-using System.Collections.Generic;
 using System.Data;
-using System.Threading.Tasks;
 
 namespace POCWebAppAssignment.Repository.RunStoredProcedures
 {
