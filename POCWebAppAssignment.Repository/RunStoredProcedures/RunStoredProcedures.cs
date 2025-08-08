@@ -289,7 +289,7 @@ namespace POCWebAppAssignment.Repository.RunStoredProcedures
                     tempKey,
                     resource.ResourceName,
                     resource.Designation,
-                    resource.ReportingTo,
+                    resource.ReportingToId,
                     resource.Billable,
                     resource.Location,
                     resource.EmailId,

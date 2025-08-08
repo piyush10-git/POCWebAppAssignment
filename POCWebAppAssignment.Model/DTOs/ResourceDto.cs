@@ -11,13 +11,12 @@ namespace POCWebAppAssignment.Model.DTOs
         public int? EmpId { get; set; }
         public string ResourceName { get; set; }
         public int Designation { get; set; }
-        public string ReportingTo { get; set; }
+        public int ReportingToId { get; set; }
         public bool Billable { get; set; }
         public int Location { get; set; }
         public string EmailId { get; set; }
         public DateOnly CteDoj { get; set; }
         public string Remarks { get; set; }
-
         public List<int> TechnologySkill { get; set; }
         public List<int> ProjectAllocation { get; set; }
     }

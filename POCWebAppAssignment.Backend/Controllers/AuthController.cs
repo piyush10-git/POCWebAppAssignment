@@ -17,7 +17,7 @@ namespace POCWebAppAssignment.API.Controllers
         }
 
         [HttpPost("login")]
-        public async Task<IActionResult> Post([FromBody] LoginDto login)
+        public async Task<IActionResult> LoginAsync([FromBody] LoginDto login)
         {
             try
             {

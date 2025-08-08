@@ -10,7 +10,7 @@
     {
         public int? DesignationId { get; set; }
         public int? LocationId { get; set; }
-        public string? ReportingTo { get; set; }
+        public int? ReportingToId { get; set; }
         public bool? Billable { get; set; }
         public DateOnly? CteDoj { get; set; }
         public string? Remarks { get; set; }

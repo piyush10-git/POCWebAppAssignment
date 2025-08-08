@@ -26,7 +26,7 @@ namespace POCWebAppAssignment.Repository.RunStoredProcedures
             DataTable employeeTable = new DataTable();
             using (SqlConnection connection = new SqlConnection(_connectionString))
             {
-                using (SqlCommand command = new SqlCommand("GetAllResources", connection))
+                using (SqlCommand command = new SqlCommand("GetAllResources1", connection))
                 {
                     command.CommandType = CommandType.StoredProcedure;
                     connection.Open();
@@ -58,7 +58,7 @@ namespace POCWebAppAssignment.Repository.RunStoredProcedures
         public async Task<int> CreateResource(ResourceDto details)
         {
             using var connection = new SqlConnection(_connectionString);
-            using var command = new SqlCommand("CreateResource", connection)
+            using var command = new SqlCommand("CreateResource1", connection)
             {
                 CommandType = CommandType.StoredProcedure
             };
@@ -66,7 +66,7 @@ namespace POCWebAppAssignment.Repository.RunStoredProcedures
             // Standard scalar parameters
             command.Parameters.AddWithValue("@ResourceName", details.ResourceName);
             command.Parameters.AddWithValue("@DesignationId", details.Designation);
-            command.Parameters.AddWithValue("@ReportingTo", details.ReportingTo ?? (object)DBNull.Value);
+            command.Parameters.AddWithValue("@ReportingToId", details.ReportingToId);
             command.Parameters.AddWithValue("@LocationId", details.Location);
             command.Parameters.AddWithValue("@EmailId", details.EmailId);
             command.Parameters.AddWithValue("@Remarks", details.Remarks ?? (object)DBNull.Value);
@@ -116,7 +116,7 @@ namespace POCWebAppAssignment.Repository.RunStoredProcedures
         public async Task<ResourceDetailsDto> GetResourceById(int empId)
         {
             using var connection = new SqlConnection(_connectionString);
-            using var command = new SqlCommand("GetResourceById", connection)
+            using var command = new SqlCommand("GetResourceById1", connection)
             {
                 CommandType = CommandType.StoredProcedure
             };
@@ -146,7 +146,7 @@ namespace POCWebAppAssignment.Repository.RunStoredProcedures
         public async Task UpdateResource(ResourceDto details)
         {
             using var connection = new SqlConnection(_connectionString);
-            using var command = new SqlCommand("UpdateResource", connection)
+            using var command = new SqlCommand("UpdateResource1", connection)
             {
                 CommandType = CommandType.StoredProcedure
             };
@@ -155,7 +155,7 @@ namespace POCWebAppAssignment.Repository.RunStoredProcedures
             command.Parameters.AddWithValue("@EmpId", details.EmpId);
             command.Parameters.AddWithValue("@ResourceName", details.ResourceName);
             command.Parameters.AddWithValue("@DesignationId", details.Designation);
-            command.Parameters.AddWithValue("@ReportingTo", details.ReportingTo ?? (object)DBNull.Value);
+            command.Parameters.AddWithValue("@ReportingToId", details.ReportingToId);
             command.Parameters.AddWithValue("@LocationId", details.Location);
             command.Parameters.AddWithValue("@EmailId", details.EmailId);
             command.Parameters.AddWithValue("@Remarks", details.Remarks ?? (object)DBNull.Value);
@@ -184,7 +184,7 @@ namespace POCWebAppAssignment.Repository.RunStoredProcedures
         {
             using (SqlConnection connection = new SqlConnection(_connectionString))
             {
-                using (SqlCommand command = new SqlCommand("DeleteResourceById", connection))
+                using (SqlCommand command = new SqlCommand("DeleteResourceById1", connection))
                 {
                     command.CommandType = CommandType.StoredProcedure;
                     command.Parameters.AddWithValue("@EmpId", empId);
@@ -199,7 +199,7 @@ namespace POCWebAppAssignment.Repository.RunStoredProcedures
         {
             using (SqlConnection connection = new SqlConnection(_connectionString))
             {
-                using (SqlCommand command = new SqlCommand("DeleteResourcesByEmpIdList", connection))
+                using (SqlCommand command = new SqlCommand("DeleteResourcesByEmpIdList1", connection))
                 {
                     command.CommandType = CommandType.StoredProcedure;
 
@@ -292,7 +292,7 @@ namespace POCWebAppAssignment.Repository.RunStoredProcedures
         public async Task<DropdownResponseDto> GetDropdownData()
         {
             using var conn = new SqlConnection(_connectionString);
-            using var cmd = new SqlCommand("GetDropdownDataJson", conn)
+            using var cmd = new SqlCommand("GetDropdownDataJson1", conn)
             {
                 CommandType = CommandType.StoredProcedure
             };
@@ -303,8 +303,6 @@ namespace POCWebAppAssignment.Repository.RunStoredProcedures
             if (await reader.ReadAsync())
             {
                 string json = reader.GetString(0);
-
-                Console.WriteLine(json);
 
                 return JsonSerializer.Deserialize<DropdownResponseDto>(json, new JsonSerializerOptions
                 {
@@ -318,7 +316,7 @@ namespace POCWebAppAssignment.Repository.RunStoredProcedures
         public async Task<int> BulkUpdateResources(BulkEditDto bulkEditDetails)
         {
             using var connection = new SqlConnection(_connectionString);
-            using var command = new SqlCommand("BulkUpdateResources", connection)
+            using var command = new SqlCommand("BulkUpdateResources1", connection)
             {
                 CommandType = CommandType.StoredProcedure
             };
@@ -331,7 +329,7 @@ namespace POCWebAppAssignment.Repository.RunStoredProcedures
             // Optional scalar values
             command.Parameters.AddWithValue("@DesignationId", (object?)bulkEditDetails.FeildsToEdit.DesignationId ?? DBNull.Value);
             command.Parameters.AddWithValue("@LocationId", (object?)bulkEditDetails.FeildsToEdit.LocationId ?? DBNull.Value);
-            command.Parameters.AddWithValue("@ReportingTo", (object?)bulkEditDetails.FeildsToEdit.ReportingTo ?? DBNull.Value);
+            command.Parameters.AddWithValue("@ReportingToId", (object?)bulkEditDetails.FeildsToEdit.ReportingToId ?? DBNull.Value);
             command.Parameters.AddWithValue("@Billable", (object?)bulkEditDetails.FeildsToEdit.Billable ?? DBNull.Value);
             command.Parameters.AddWithValue("@CteDoj", bulkEditDetails.FeildsToEdit.CteDoj.HasValue
                 ? (object)bulkEditDetails.FeildsToEdit.CteDoj.Value.ToDateTime(TimeOnly.MinValue)
@@ -380,7 +378,7 @@ namespace POCWebAppAssignment.Repository.RunStoredProcedures
                 employeesTable.Columns.Add("TempKey", typeof(Guid));
                 employeesTable.Columns.Add("ResourceName", typeof(string));
                 employeesTable.Columns.Add("DesignationId", typeof(int));
-                employeesTable.Columns.Add("ReportingTo", typeof(string));
+                employeesTable.Columns.Add("ReportingToId", typeof(int));
                 employeesTable.Columns.Add("Billable", typeof(bool));
                 employeesTable.Columns.Add("LocationId", typeof(int));
                 employeesTable.Columns.Add("EmailId", typeof(string));
@@ -403,7 +401,7 @@ namespace POCWebAppAssignment.Repository.RunStoredProcedures
                         tempKey,
                         resource.ResourceName,
                         resource.Designation,
-                        resource.ReportingTo ?? (object)DBNull.Value,
+                        resource.ReportingToId,
                         resource.Billable,
                         resource.Location,
                         resource.EmailId,
@@ -429,14 +427,14 @@ namespace POCWebAppAssignment.Repository.RunStoredProcedures
                 }
 
                 using var connection = new SqlConnection(_connectionString);
-                using var command = new SqlCommand("sp_BulkImport", connection)
+                using var command = new SqlCommand("sp_BulkImport2", connection)
                 {
                     CommandType = CommandType.StoredProcedure
                 };
 
                 var employeesParam = command.Parameters.AddWithValue("@Employees", employeesTable);
                 employeesParam.SqlDbType = SqlDbType.Structured;
-                employeesParam.TypeName = "dbo.TempEmployee";
+                employeesParam.TypeName = "dbo.TempEmployee1";
 
                 var skillsParam = command.Parameters.AddWithValue("@Skills", skillsTable);
                 skillsParam.SqlDbType = SqlDbType.Structured;

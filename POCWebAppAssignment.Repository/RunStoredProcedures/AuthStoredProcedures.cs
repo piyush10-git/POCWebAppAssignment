@@ -66,8 +66,8 @@ namespace POCWebAppAssignment.Repository.RunStoredProcedures
 
             command.Parameters.AddWithValue("@UserName", signup.UserName);
             command.Parameters.AddWithValue("@EmailId", signup.Email);
-            command.Parameters.AddWithValue("@PasswordHash", signup.Password); // Use a hashed value
-            command.Parameters.AddWithValue("@RoleId", signup.RoleId); // FIXED: add missing parameter
+            command.Parameters.AddWithValue("@PasswordHash", signup.Password);
+            command.Parameters.AddWithValue("@RoleId", signup.RoleId);
 
             var outputParam = new SqlParameter("@UserId", SqlDbType.Int)
             {

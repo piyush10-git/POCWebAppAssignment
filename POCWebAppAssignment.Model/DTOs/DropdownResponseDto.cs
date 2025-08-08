@@ -6,5 +6,6 @@
         public List<OptionDto> Skills { get; set; }
         public List<OptionDto> Locations { get; set; }
         public List<OptionDto> Projects { get; set; }
+        public List<OptionDto> Managers { get; set; }
     }
 }

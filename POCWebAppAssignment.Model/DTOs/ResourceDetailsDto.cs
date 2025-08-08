@@ -4,12 +4,12 @@
     {
         public int EmpId { get; set; }
         public string Name { get; set; }
-        public string ReportingTo { get; set; }
         public bool Billable { get; set; }
         public string Email { get; set; }
         public string Remarks { get; set; }
         public DateOnly CteDoj { get; set; }
 
+        public OptionDto ReportingTo { get; set; }
         public OptionDto Designation { get; set; }
         public OptionDto Location { get; set; }
 
