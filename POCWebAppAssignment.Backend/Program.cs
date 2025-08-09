@@ -6,6 +6,7 @@ using POCWebAppAssignment.Repository.Repositories;
 using POCWebAppAssignment.Repository.RunStoredProcedures;
 using Microsoft.AspNetCore.Authentication;
 using Serilog;
+using POCWebAppAssignment.Orchestration.HelperClasses;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,6 +21,7 @@ builder.Services.AddSwaggerGen();
 // Authorization and Authentication DI
 builder.Services.AddTransient<IAuthStoredProcedures, AuthStoredProcedures>();
 builder.Services.AddTransient<IAuthRepository, AuthRepository>();
+builder.Services.AddSingleton<IJWTService, JWTService>();
 builder.Services.AddTransient<IAuthService, AuthService>();
 
 // Registering dependencies
