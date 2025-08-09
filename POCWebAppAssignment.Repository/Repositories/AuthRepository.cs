@@ -19,9 +19,9 @@ namespace POCWebAppAssignment.Repository.Repositories
             _authStoredProcedure = authStoredProcedure;
         }
 
-        public async Task<UserWithRolesDto?> GetUserWithRolesAsync(string UserName, string Password)
+        public async Task<UserWithRolesDto?> GetUserWithRolesAsync(string UserName)
         {
-            return await _authStoredProcedure.GetUserWithRolesAsync(UserName, Password);
+            return await _authStoredProcedure.GetUserWithRolesAsync(UserName);
         }
 
         public async Task<int?> CreateUserAaync(SignupDto signup)

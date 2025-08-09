@@ -22,7 +22,7 @@ namespace POCWebAppAssignment.Repository.RunStoredProcedures
             _connectionString = configuration.GetConnectionString("DB_Connection");
         }
 
-        public async Task<UserWithRolesDto?> GetUserWithRolesAsync(string UserNameOrEmail, string Password)
+        public async Task<UserWithRolesDto?> GetUserWithRolesAsync(string UserNameOrEmail)
         {
             using var conn = new SqlConnection(_connectionString);
             await conn.OpenAsync();
@@ -33,7 +33,6 @@ namespace POCWebAppAssignment.Repository.RunStoredProcedures
             };
 
             cmd.Parameters.AddWithValue("@EmailIdOrUsername", UserNameOrEmail);
-            cmd.Parameters.AddWithValue("@PasswordHash", Password);
 
             using var reader = await cmd.ExecuteReaderAsync();
 
@@ -42,7 +41,8 @@ namespace POCWebAppAssignment.Repository.RunStoredProcedures
             var user = new UserWithRolesDto
             {
                 UserId = reader.GetInt32(0),
-                UserName = reader.GetString(1)
+                UserName = reader.GetString(1),
+                PasswordHash = reader.GetString(2),
             };
 
             if (await reader.NextResultAsync())

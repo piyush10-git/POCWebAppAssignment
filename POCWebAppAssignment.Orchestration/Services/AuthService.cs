@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using POCWebAppAssignment.Interfaces;
@@ -7,6 +8,7 @@ using POCWebAppAssignment.Model.AuthDTOs;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
+using System.Security.Cryptography.Xml;
 using System.Text;
 
 
@@ -40,11 +42,22 @@ namespace POCWebAppAssignment.Orchestration.Services
 
         public async Task<LoginResultDto> LoginAsync(LoginDto loginCredentials)
         {
-            var passwordHash = HashPassword(loginCredentials.Password);
-            var user = await _authRepo.GetUserWithRolesAsync(loginCredentials.usernameOrEmail, passwordHash);
+            var user = await _authRepo.GetUserWithRolesAsync(loginCredentials.usernameOrEmail);
 
             if (user == null)
                 return new LoginResultDto(false, null, "Invalid username or password", null);
+
+            var hasher = new PasswordHasher<ApplicationUser>();
+            var result = hasher.VerifyHashedPassword(
+                new ApplicationUser(),
+                user.PasswordHash,
+                loginCredentials.Password
+            );
+
+            if(result != PasswordVerificationResult.Success)
+            {
+                return new LoginResultDto(false, null, "Invalid username or password", null);
+            }
 
             var token = GenerateJwtToken(user);
 
@@ -76,10 +89,13 @@ namespace POCWebAppAssignment.Orchestration.Services
 
         private string HashPassword(string password)
         {
-            using var sha = SHA256.Create();
-            var bytes = Encoding.UTF8.GetBytes(password);
-            var hash = sha.ComputeHash(bytes);
-            return Convert.ToBase64String(hash);
+            //using var sha = SHA256.Create();
+            //var bytes = Encoding.UTF8.GetBytes(password);
+            //var hash = sha.ComputeHash(bytes);
+            //return Convert.ToBase64String(hash);
+
+            var hasher = new PasswordHasher<ApplicationUser>();
+            return hasher.HashPassword(new ApplicationUser(), password);
         }
     }
 }

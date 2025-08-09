@@ -9,7 +9,7 @@ namespace POCWebAppAssignment.Interfaces.Authentication
 {
     public interface IAuthStoredProcedures
     {
-        Task<UserWithRolesDto?> GetUserWithRolesAsync(string UserName, string Password);
+        Task<UserWithRolesDto?> GetUserWithRolesAsync(string UserName);
         Task<int?> CreateUserAsync(SignupDto signup);
     }
 }
