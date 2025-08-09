@@ -42,6 +42,7 @@ namespace POCWebAppAssignment.Orchestration.Services
 
         public async Task<LoginResultDto> LoginAsync(LoginDto loginCredentials)
         {
+            // Get user details
             var user = await _authRepo.GetUserWithRolesAsync(loginCredentials.usernameOrEmail);
 
             if (user == null)
