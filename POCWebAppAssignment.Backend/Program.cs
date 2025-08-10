@@ -25,7 +25,8 @@ builder.Services.AddSingleton<IJWTService, JWTService>();
 builder.Services.AddTransient<IAuthService, AuthService>();
 
 // Registering dependencies
-builder.Services.AddTransient<IRunStoredProceduresNormalizedTable, RunStoredProceduresNormalizedTable>();
+//builder.Services.AddTransient<IRunStoredProceduresNormalizedTable, RunStoredProceduresNormalizedTable>();
+builder.Services.AddTransient<IResourceProcedureService, ResourceProcedureService>();
 builder.Services.AddTransient<IResourceRepository, ResourceRepository>();
 builder.Services.AddTransient<IResourceService, ResourceService>();
 

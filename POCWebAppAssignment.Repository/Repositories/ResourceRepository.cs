@@ -8,9 +8,10 @@ namespace POCWebAppAssignment.Repository.Repositories
 {
     public class ResourceRepository : IResourceRepository
     {
-        private readonly IRunStoredProceduresNormalizedTable _runStoredProcedures;
+        //private readonly IRunStoredProceduresNormalizedTable _runStoredProcedures;
+        private readonly IResourceProcedureService _runStoredProcedures;
         private readonly ILogger<ResourceRepository> _logger;
-        public ResourceRepository(IRunStoredProceduresNormalizedTable runStoredProcedures, ILogger<ResourceRepository> logger) {
+        public ResourceRepository(IResourceProcedureService runStoredProcedures, ILogger<ResourceRepository> logger) {
             _runStoredProcedures = runStoredProcedures;
             _logger = logger;
         }

@@ -1,59 +1,24 @@
 ﻿using Microsoft.Data.SqlClient;
-using System;
-using System.Collections.Generic;
 using System.Data;
-using System.Threading.Tasks;
+using System.Text.Json;
 
-namespace POCWebAppAssignment.Helpers
+namespace POCWebAppAssignment.Repository.Helpers
 {
-    public class SqlHelper
+    public static class SqlHelper
     {
-        private readonly string _connectionString;
-
-        public SqlHelper(string connectionString)
-        {
-            _connectionString = connectionString;
-        }
-
-        // Execute NonQuery (Insert, Update, Delete)
-        public async Task<int> ExecuteNonQueryAsync(string storedProcedure, Dictionary<string, object> parameters = null, Dictionary<string, SqlParameter> outputParameters = null)
-        {
-            using var connection = new SqlConnection(_connectionString);
-            using var command = new SqlCommand(storedProcedure, connection)
-            {
-                CommandType = CommandType.StoredProcedure
-            };
-
-            AddParameters(command, parameters);
-            AddOutputParameters(command, outputParameters);
-
-            await connection.OpenAsync();
-            await command.ExecuteNonQueryAsync();
-
-            // Return output parameter value if needed
-            if (outputParameters != null)
-            {
-                foreach (var param in outputParameters)
-                {
-                    param.Value.Value = command.Parameters[param.Key].Value;
-                }
-            }
-
-            return 1;
-        }
-
-        // Execute Reader and return DataTable
-        public async Task<DataTable> ExecuteReaderAsync(string storedProcedure, Dictionary<string, object> parameters = null)
+        // Executes a stored procedure and returns a DataTable
+        public static async Task<DataTable> ExecuteDataTableAsync(string connectionString, string storedProcedure, IEnumerable<SqlParameter>? parameters = null)
         {
             var dataTable = new DataTable();
 
-            using var connection = new SqlConnection(_connectionString);
+            using var connection = new SqlConnection(connectionString);
             using var command = new SqlCommand(storedProcedure, connection)
             {
                 CommandType = CommandType.StoredProcedure
             };
 
-            AddParameters(command, parameters);
+            if (parameters != null)
+                command.Parameters.AddRange(parameters.ToArray());
 
             await connection.OpenAsync();
             using var reader = await command.ExecuteReaderAsync();
@@ -62,62 +27,110 @@ namespace POCWebAppAssignment.Helpers
             return dataTable;
         }
 
-        // Execute Reader and return SqlDataReader (for custom row reading)
-        public async Task<SqlDataReader> ExecuteReaderRawAsync(string storedProcedure, Dictionary<string, object> parameters = null)
+        // Executes a stored procedure with output parameters
+        public static async Task ExecuteStoredProcedureWithOutputAsync(string connectionString, string storedProcedure, List<SqlParameter> parameters)
         {
-            var connection = new SqlConnection(_connectionString);
-            var command = new SqlCommand(storedProcedure, connection)
-            {
-                CommandType = CommandType.StoredProcedure
-            };
-
-            AddParameters(command, parameters);
-
-            await connection.OpenAsync();
-            return await command.ExecuteReaderAsync(CommandBehavior.CloseConnection);
-        }
-
-        // Helper to add input parameters
-        private void AddParameters(SqlCommand command, Dictionary<string, object> parameters)
-        {
-            if (parameters == null) return;
-
-            foreach (var param in parameters)
-            {
-                var value = param.Value ?? DBNull.Value;
-                command.Parameters.AddWithValue(param.Key, value);
-            }
-        }
-
-        // Helper to add output parameters
-        private void AddOutputParameters(SqlCommand command, Dictionary<string, SqlParameter> outputParameters)
-        {
-            if (outputParameters == null) return;
-
-            foreach (var param in outputParameters)
-            {
-                param.Value.Direction = ParameterDirection.Output;
-                command.Parameters.Add(param.Value);
-            }
-        }
-
-        // Execute with table-valued parameter
-        public async Task ExecuteWithDataTablesAsync(string storedProcedure, Dictionary<string, DataTable> tvps)
-        {
-            using var connection = new SqlConnection(_connectionString);
+            using var connection = new SqlConnection(connectionString);
             using var command = new SqlCommand(storedProcedure, connection)
             {
                 CommandType = CommandType.StoredProcedure
             };
 
-            foreach (var tvp in tvps)
-            {
-                var param = command.Parameters.AddWithValue(tvp.Key, tvp.Value);
-                param.SqlDbType = SqlDbType.Structured;
-            }
+            command.Parameters.AddRange(parameters.ToArray());
 
             await connection.OpenAsync();
             await command.ExecuteNonQueryAsync();
+        }
+
+        // Executes a stored procedure that returns a single JSON string, and deserializes it
+        public static async Task<T?> DeserializeJsonFromReaderAsync<T>(string connectionString, string storedProcedure, IEnumerable<SqlParameter>? parameters = null)
+        {
+            using var connection = new SqlConnection(connectionString);
+            using var command = new SqlCommand(storedProcedure, connection)
+            {
+                CommandType = CommandType.StoredProcedure
+            };
+
+            if (parameters != null)
+                command.Parameters.AddRange(parameters.ToArray());
+
+            await connection.OpenAsync();
+
+            using var reader = await command.ExecuteReaderAsync();
+            if (await reader.ReadAsync())
+            {
+                var json = reader.GetString(0);
+
+                return JsonSerializer.Deserialize<T>(json, new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                });
+            }
+
+            return default;
+        }
+
+        // Execute a stored procedure returning a scalar value
+        public static async Task<T> ExecuteScalarAsync<T>(string connectionString, string storedProcedure, IEnumerable<SqlParameter>? parameters = null)
+        {
+            using var connection = new SqlConnection(connectionString);
+            using var command = new SqlCommand(storedProcedure, connection)
+            {
+                CommandType = CommandType.StoredProcedure
+            };
+
+            if (parameters != null)
+                command.Parameters.AddRange(parameters.ToArray());
+
+            await connection.OpenAsync();
+            var result = await command.ExecuteScalarAsync();
+            return (T)Convert.ChangeType(result, typeof(T));
+        }
+
+        // Executes a stored procedure that performs a non-query (insert/update/delete)
+        public static async Task ExecuteNonQueryAsync(string connectionString, string storedProcedure, IEnumerable<SqlParameter>? parameters = null)
+        {
+            using var connection = new SqlConnection(connectionString);
+            using var command = new SqlCommand(storedProcedure, connection)
+            {
+                CommandType = CommandType.StoredProcedure
+            };
+
+            if (parameters != null)
+                command.Parameters.AddRange(parameters.ToArray());
+
+            await connection.OpenAsync();
+            await command.ExecuteNonQueryAsync();
+        }
+
+        // Helper: Converts a list of ints to a DataTable for TVP use
+        public static DataTable CreateIdDataTable(IEnumerable<int> ids, string columnName = "Id")
+        {
+            var table = new DataTable();
+            table.Columns.Add(columnName, typeof(int));
+
+            foreach (var id in ids ?? Enumerable.Empty<int>())
+            {
+                table.Rows.Add(id);
+            }
+
+            return table;
+        }
+
+        // Helper: Safely create SQL parameter with DBNull handling
+        public static SqlParameter CreateSqlParameter(string name, object? value)
+        {
+            return new SqlParameter(name, value ?? DBNull.Value);
+        }
+
+        // Helper: Create TVP SqlParameter
+        public static SqlParameter CreateTvpParameter(string name, DataTable table, string typeName)
+        {
+            return new SqlParameter(name, SqlDbType.Structured)
+            {
+                TypeName = typeName,
+                Value = table
+            };
         }
     }
 }
