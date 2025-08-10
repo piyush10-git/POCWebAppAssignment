@@ -3,15 +3,15 @@ using POCWebAppAssignment.Interfaces;
 using POCWebAppAssignment.Model;
 using POCWebAppAssignment.Model.DTOs;
 
-
 namespace POCWebAppAssignment.Repository.Repositories
 {
     public class ResourceRepository : IResourceRepository
     {
-        //private readonly IRunStoredProceduresNormalizedTable _runStoredProcedures;
         private readonly IResourceProcedureService _runStoredProcedures;
         private readonly ILogger<ResourceRepository> _logger;
-        public ResourceRepository(IResourceProcedureService runStoredProcedures, ILogger<ResourceRepository> logger) {
+
+        public ResourceRepository(IResourceProcedureService runStoredProcedures, ILogger<ResourceRepository> logger)
+        {
             _runStoredProcedures = runStoredProcedures;
             _logger = logger;
         }
@@ -20,12 +20,14 @@ namespace POCWebAppAssignment.Repository.Repositories
         {
             try
             {
-                _logger.LogInformation("Creating resource with Email {Email}.", resource.EmailId);
-                return await _runStoredProcedures.CreateResource(resource);
+                _logger.LogInformation("Creating resource with email: {Email}.", resource.EmailId);
+                var id = await _runStoredProcedures.CreateResource(resource);
+                _logger.LogInformation("Successfully created resource with ID: {EmpId}.", id);
+                return id;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error creating resource with Email {Email}.", resource.EmailId);
+                _logger.LogError(ex, "Failed to create resource with email: {Email}.", resource.EmailId);
                 throw;
             }
         }
@@ -34,12 +36,13 @@ namespace POCWebAppAssignment.Repository.Repositories
         {
             try
             {
-                _logger.LogInformation("Deleting resource with ID {EmpId}.", empId);
+                _logger.LogInformation("Deleting resource with ID: {EmpId}.", empId);
                 await _runStoredProcedures.DeleteResource(empId);
+                _logger.LogInformation("Successfully deleted resource with ID: {EmpId}.", empId);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error deleting resource with ID {EmpId}.", empId);
+                _logger.LogError(ex, "Failed to delete resource with ID: {EmpId}.", empId);
                 throw;
             }
         }
@@ -48,12 +51,13 @@ namespace POCWebAppAssignment.Repository.Repositories
         {
             try
             {
-                _logger.LogInformation("Deleting resources with IDs {empIds}.", empIds.ToString());
+                _logger.LogInformation("Deleting multiple resources. IDs: {@EmpIds}", empIds);
                 await _runStoredProcedures.DeleteResourcesByEmpIdList(empIds);
+                _logger.LogInformation("Successfully deleted {Count} resources.", empIds.Count);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error deleting resource with IDs {empIds}.", empIds.ToString());
+                _logger.LogError(ex, "Error deleting multiple resources. IDs: {@EmpIds}", empIds);
                 throw;
             }
         }
@@ -62,12 +66,14 @@ namespace POCWebAppAssignment.Repository.Repositories
         {
             try
             {
-                _logger.LogInformation("Retrieving all resources.");
-                return await _runStoredProcedures.GetAll();
+                _logger.LogInformation("Fetching all resources.");
+                var resources = await _runStoredProcedures.GetAll();
+                _logger.LogInformation("Successfully retrieved {Count} resources.", resources?.Count() ?? 0);
+                return resources;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error retrieving all resources.");
+                _logger.LogError(ex, "Error fetching all resources.");
                 throw;
             }
         }
@@ -76,12 +82,21 @@ namespace POCWebAppAssignment.Repository.Repositories
         {
             try
             {
-                _logger.LogInformation("Retrieving resource with ID {EmpId}.", empId);
-                return await _runStoredProcedures.GetResourceById(empId);
+                _logger.LogInformation("Fetching resource with ID: {EmpId}.", empId);
+                var resource = await _runStoredProcedures.GetResourceById(empId);
+                if (resource == null)
+                {
+                    _logger.LogWarning("No resource found with ID: {EmpId}.", empId);
+                }
+                else
+                {
+                    _logger.LogInformation("Successfully retrieved resource with ID: {EmpId}.", empId);
+                }
+                return resource;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error retrieving resource with ID {EmpId}.", empId);
+                _logger.LogError(ex, "Error retrieving resource with ID: {EmpId}.", empId);
                 throw;
             }
         }
@@ -90,12 +105,13 @@ namespace POCWebAppAssignment.Repository.Repositories
         {
             try
             {
-                _logger.LogInformation("Updating resource with ID {EmpId}.", resource.EmpId);
+                _logger.LogInformation("Updating resource with ID: {EmpId}.", resource.EmpId);
                 await _runStoredProcedures.UpdateResource(resource);
+                _logger.LogInformation("Successfully updated resource with ID: {EmpId}.", resource.EmpId);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error updating resource with ID {EmpId}.", resource.EmpId);
+                _logger.LogError(ex, "Error updating resource with ID: {EmpId}.", resource.EmpId);
                 throw;
             }
         }
@@ -104,8 +120,10 @@ namespace POCWebAppAssignment.Repository.Repositories
         {
             try
             {
-                _logger.LogInformation("Retrieving resource statistics.");
-                return await _runStoredProcedures.GetResourceStatistics();
+                _logger.LogInformation("Fetching resource statistics.");
+                var stats = await _runStoredProcedures.GetResourceStatistics();
+                _logger.LogInformation("Successfully retrieved resource statistics.");
+                return stats;
             }
             catch (Exception ex)
             {
@@ -119,11 +137,14 @@ namespace POCWebAppAssignment.Repository.Repositories
             try
             {
                 _logger.LogInformation("Checking if email exists: {Email}.", emailId);
-                return await _runStoredProcedures.CheckEmailExists(emailId);
+                var exists = await _runStoredProcedures.CheckEmailExists(emailId);
+
+                _logger.LogInformation("Email check result for {Email}: {Exists}.", emailId, exists);
+                return exists;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error checking if email exists: {Email}.", emailId);
+                _logger.LogError(ex, "Error checking email existence: {Email}.", emailId);
                 throw;
             }
         }
@@ -132,12 +153,14 @@ namespace POCWebAppAssignment.Repository.Repositories
         {
             try
             {
-                _logger.LogInformation("Getting the drop down data.");
-                return await _runStoredProcedures.GetDropdownData();
+                _logger.LogInformation("Fetching dropdown data.");
+                var data = await _runStoredProcedures.GetDropdownData();
+                _logger.LogInformation("Successfully fetched dropdown data.");
+                return data;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error getting drop down data.");
+                _logger.LogError(ex, "Error fetching dropdown data.");
                 throw;
             }
         }
@@ -146,12 +169,14 @@ namespace POCWebAppAssignment.Repository.Repositories
         {
             try
             {
-                _logger.LogInformation("Bulk Updating resource with IDs {EmpIds}.", bulkEditDetails.ResourceIds.ToString());
-                return await _runStoredProcedures.BulkUpdateResources(bulkEditDetails);
+                _logger.LogInformation("Bulk updating resources. IDs: {@EmpIds}", bulkEditDetails.ResourceIds);
+                var updated = await _runStoredProcedures.BulkUpdateResources(bulkEditDetails);
+                _logger.LogInformation("Successfully bulk updated {Count} resources.", updated);
+                return updated;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error bulk updating resources with ID {EmpIds}.", bulkEditDetails.ResourceIds.ToString());
+                _logger.LogError(ex, "Error during bulk update of resources. IDs: {@EmpIds}", bulkEditDetails.ResourceIds);
                 throw;
             }
         }
@@ -160,20 +185,31 @@ namespace POCWebAppAssignment.Repository.Repositories
         {
             try
             {
-                _logger.LogInformation("Createing bulk resources.");
+                _logger.LogInformation("Creating {Count} resources in bulk.", resources.Count);
                 await _runStoredProcedures.BulkCreateResourcesAsync(resources);
+                _logger.LogInformation("Successfully created {Count} resources in bulk.", resources.Count);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error creating {#resources} resources with ID {EmpIds}.", resources.Count.ToString());
+                _logger.LogError(ex, "Error during bulk creation of {Count} resources.", resources.Count);
                 throw;
             }
         }
 
         public async Task<List<OptionDto>?> GetRoleOptionsDropDownAsync()
         {
-            return await _runStoredProcedures.GetRoleOptionsDropDownAsync();
+            try
+            {
+                _logger.LogInformation("Fetching role options for dropdown.");
+                var options = await _runStoredProcedures.GetRoleOptionsDropDownAsync();
+                _logger.LogInformation("Successfully retrieved {Count} role options.", options?.Count ?? 0);
+                return options;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error fetching role options for dropdown.");
+                throw;
+            }
         }
-
     }
 }

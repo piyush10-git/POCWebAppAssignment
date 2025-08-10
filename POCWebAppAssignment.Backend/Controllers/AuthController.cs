@@ -10,23 +10,29 @@ namespace POCWebAppAssignment.API.Controllers
     public class AuthController : ControllerBase
     {
         private readonly IAuthService _authService;
+        private readonly ILogger<AuthController> _logger;
 
-        public AuthController(IAuthService authService)
+        public AuthController(IAuthService authService, ILogger<AuthController> logger)
         {
             _authService = authService;
+            _logger = logger;
         }
 
         [HttpPost("login")]
         public async Task<IActionResult> LoginAsync([FromBody] LoginDto login)
         {
+            _logger.LogInformation("Login attempt started for user: {Username}", login.usernameOrEmail);
+
             try
             {
                 LoginResultDto loginResult = await _authService.LoginAsync(login);
 
                 if (!loginResult.IsValid)
                 {
-                    var unauthorizedResponse = new ApiResponse<string?>(false, loginResult.Error ?? "Invalid credentials", null);
-                    return Unauthorized(unauthorizedResponse);
+                    _logger.LogWarning("Login failed for user: {Username}. Reason: {Error}", login.usernameOrEmail, loginResult.Error ?? "Invalid credentials");
+
+                    var unauthorizedResponse = new ApiResponse<string?>(false, loginResult.Error ?? "Invalid username or password", null);
+                    return Unauthorized(unauthorizedResponse); // 401
                 }
 
                 var loginData = new
@@ -36,37 +42,48 @@ namespace POCWebAppAssignment.API.Controllers
                     role = loginResult.User.Roles
                 };
 
+                _logger.LogInformation("Login successful for user: {Username}", login.usernameOrEmail);
+
                 var successResponse = new ApiResponse<object>(true, "Login successful", loginData);
-                return Ok(successResponse);
+                return Ok(successResponse); // 200
             }
             catch (Exception ex)
             {
-                var errorResponse = new ApiResponse<string?>(false, "An error occurred during login", ex.Message);
-                return StatusCode(500, errorResponse);
+                _logger.LogError(ex, "Unhandled exception during login for user: {Username}", login.usernameOrEmail);
+
+                var errorResponse = new ApiResponse<string?>(false, "An internal server error occurred during login.", null);
+                return StatusCode(500, errorResponse); // 500
             }
         }
-
 
         [HttpPost("sign-up")]
         public async Task<IActionResult> SignUp([FromBody] SignupDto signup)
         {
+            _logger.LogInformation("Signup attempt for user: {Username}", signup.UserName);
+
             try
             {
                 var userId = await _authService.SignUpAsync(signup);
 
                 if (userId == null)
                 {
-                    var failureResponse = new ApiResponse<string?>(false, "User creation failed", null);
-                    return BadRequest(failureResponse);
+                    _logger.LogWarning("User creation failed for username: {Username}", signup.UserName);
+
+                    var failureResponse = new ApiResponse<string?>(false, "User creation failed. Please try again.", null);
+                    return BadRequest(failureResponse); // 400
                 }
 
+                _logger.LogInformation("User created successfully with ID: {UserId} for username: {Username}", userId, signup.UserName);
+
                 var successResponse = new ApiResponse<int?>(true, "User created successfully", userId);
-                return Ok(successResponse);
+                return StatusCode(201, successResponse); // 201 Created
             }
             catch (Exception ex)
             {
-                var errorResponse = new ApiResponse<string?>(false, "Something went wrong", ex.Message);
-                return StatusCode(500, errorResponse);
+                _logger.LogError(ex, "Unhandled exception during signup for username: {Username}", signup.UserName);
+
+                var errorResponse = new ApiResponse<string?>(false, "An internal server error occurred during signup.", null);
+                return StatusCode(500, errorResponse); // 500
             }
         }
     }

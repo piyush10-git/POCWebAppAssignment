@@ -2,81 +2,99 @@
 using POCWebAppAssignment.Interfaces;
 using POCWebAppAssignment.Model;
 using POCWebAppAssignment.Model.DTOs;
-using POCWebAppAssignment.Repository.RunStoredProcedures;
-
 
 namespace POCWebAppAssignment.Orchestration.Services
 {
-    public class ResourceService: IResourceService
+    public class ResourceService : IResourceService
     {
         private readonly IResourceRepository _resourceRepository;
         private readonly ILogger<ResourceService> _logger;
-        public ResourceService(IResourceRepository newResourceRepository, ILogger<ResourceService> logger) {
-            _resourceRepository = newResourceRepository;
+
+        public ResourceService(IResourceRepository resourceRepository, ILogger<ResourceService> logger)
+        {
+            _resourceRepository = resourceRepository;
             _logger = logger;
         }
+
         public async Task<IEnumerable<Resource>> GetAllResourcesAsync()
         {
             try
             {
-                _logger.LogInformation("Fetching all resources.");
-                return await _resourceRepository.GetAllResourcesAsync();
+                _logger.LogInformation("Starting to fetch all resources.");
+                var result = await _resourceRepository.GetAllResourcesAsync();
+                _logger.LogInformation("Successfully fetched {Count} resources.", result?.Count() ?? 0);
+                return result;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error occurred while fetching all resources.");
+                _logger.LogError(ex, "Failed to fetch all resources due to an unexpected error.");
                 throw;
             }
         }
+
         public async Task<ResourceDetailsDto?> GetResourceByIdAsync(int empId)
         {
             try
             {
-                _logger.LogInformation("Fetching resource with ID {EmpId}.", empId);
-                return await _resourceRepository.GetResourceByIdAsync(empId);
+                _logger.LogInformation("Fetching resource by ID: {EmpId}", empId);
+                var result = await _resourceRepository.GetResourceByIdAsync(empId);
+
+                if (result == null)
+                    _logger.LogWarning("No resource found with ID: {EmpId}", empId);
+                else
+                    _logger.LogInformation("Successfully fetched resource with ID: {EmpId}", empId);
+
+                return result;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error occurred while fetching resource with ID {EmpId}.", empId);
+                _logger.LogError(ex, "Error occurred while fetching resource with ID: {EmpId}", empId);
                 throw;
             }
         }
+
         public async Task<int> CreateResourceAsync(ResourceDto resource)
         {
             try
             {
-                _logger.LogInformation("Creating a new resource with Email {Email}.", resource.EmailId);
-                return await _resourceRepository.CreateResourceAsync(resource);
+                _logger.LogInformation("Creating a new resource. Email: {Email}", resource.EmailId);
+                var newEmpId = await _resourceRepository.CreateResourceAsync(resource);
+                _logger.LogInformation("Successfully created resource with ID: {EmpId}", newEmpId);
+                return newEmpId;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error occurred while creating resource with Email {Email}.", resource.EmailId);
+                _logger.LogError(ex, "Failed to create resource with Email: {Email}", resource.EmailId);
                 throw;
             }
         }
+
         public async Task UpdateResourceAsync(ResourceDto resource)
         {
             try
             {
-                _logger.LogInformation("Updating resource with ID {EmpId}.", resource.EmpId);
+                _logger.LogInformation("Updating resource with ID: {EmpId}", resource.EmpId);
                 await _resourceRepository.UpdateResourceAsync(resource);
+                _logger.LogInformation("Successfully updated resource with ID: {EmpId}", resource.EmpId);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error occurred while updating resource with ID {EmpId}.", resource.EmpId);
+                _logger.LogError(ex, "Error occurred while updating resource with ID: {EmpId}", resource.EmpId);
                 throw;
             }
         }
+
         public async Task DeleteResourceAsync(int empId)
         {
             try
             {
-                _logger.LogInformation("Deleting resource with ID {EmpId}.", empId);
+                _logger.LogInformation("Deleting resource with ID: {EmpId}", empId);
                 await _resourceRepository.DeleteResourceAsync(empId);
+                _logger.LogInformation("Successfully deleted resource with ID: {EmpId}", empId);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error occurred while deleting resource with ID {EmpId}.", empId);
+                _logger.LogError(ex, "Failed to delete resource with ID: {EmpId}", empId);
                 throw;
             }
         }
@@ -85,12 +103,13 @@ namespace POCWebAppAssignment.Orchestration.Services
         {
             try
             {
-                _logger.LogInformation("Deleting resources with IDs {empIds}.", empIds.ToString());
+                _logger.LogInformation("Deleting multiple resources. IDs: {@EmpIds}", empIds);
                 await _resourceRepository.DeleteResourcesByEmpIdListAsync(empIds);
+                _logger.LogInformation("Successfully deleted {Count} resources.", empIds.Count);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error deleting resource with IDs {empIds}.", empIds.ToString());
+                _logger.LogError(ex, "Error occurred while deleting resources. IDs: {@EmpIds}", empIds);
                 throw;
             }
         }
@@ -100,11 +119,13 @@ namespace POCWebAppAssignment.Orchestration.Services
             try
             {
                 _logger.LogInformation("Fetching resource statistics.");
-                return await _resourceRepository.GetResourceStatisticsAsync();
+                var stats = await _resourceRepository.GetResourceStatisticsAsync();
+                _logger.LogInformation("Fetched {Count} resource statistics.", stats?.Count() ?? 0);
+                return stats;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error occurred while fetching resource statistics.");
+                _logger.LogError(ex, "Failed to fetch resource statistics.");
                 throw;
             }
         }
@@ -113,12 +134,19 @@ namespace POCWebAppAssignment.Orchestration.Services
         {
             try
             {
-                _logger.LogInformation("Checking if email exists: {Email}.", emailId);
-                return await _resourceRepository.CheckEmailExistsAsync(emailId);
+                _logger.LogInformation("Checking if email exists: {Email}", emailId);
+                var exists = await _resourceRepository.CheckEmailExistsAsync(emailId);
+
+                if (exists)
+                    _logger.LogInformation("Email {Email} already exists.", emailId);
+                else
+                    _logger.LogInformation("Email {Email} is available.", emailId);
+
+                return exists;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error occurred while checking email existence: {Email}.", emailId);
+                _logger.LogError(ex, "Error occurred while checking email existence: {Email}", emailId);
                 throw;
             }
         }
@@ -127,12 +155,14 @@ namespace POCWebAppAssignment.Orchestration.Services
         {
             try
             {
-                _logger.LogInformation("Getting the drop down data.");
-                return await _resourceRepository.GetDropdownDataAsync();
+                _logger.LogInformation("Fetching dropdown data for UI.");
+                var dropdownData = await _resourceRepository.GetDropdownDataAsync();
+                _logger.LogInformation("Successfully fetched dropdown data.");
+                return dropdownData;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error getting drop down data.");
+                _logger.LogError(ex, "Failed to fetch dropdown data.");
                 throw;
             }
         }
@@ -141,12 +171,14 @@ namespace POCWebAppAssignment.Orchestration.Services
         {
             try
             {
-                _logger.LogInformation("Bulk Updating resource with IDs {EmpIds}.", bulkEditDetails.ResourceIds.ToString());
-                return await _resourceRepository.BulkUpdateResourcesAsync(bulkEditDetails);
+                _logger.LogInformation("Initiating bulk update for resources. IDs: {@EmpIds}", bulkEditDetails.ResourceIds);
+                var updatedCount = await _resourceRepository.BulkUpdateResourcesAsync(bulkEditDetails);
+                _logger.LogInformation("Successfully bulk updated {Count} resources.", updatedCount);
+                return updatedCount;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error bulk updating resources with ID {EmpIds}.", bulkEditDetails.ResourceIds.ToString());
+                _logger.LogError(ex, "Error during bulk update for resource IDs: {@EmpIds}", bulkEditDetails.ResourceIds);
                 throw;
             }
         }
@@ -155,19 +187,31 @@ namespace POCWebAppAssignment.Orchestration.Services
         {
             try
             {
-                _logger.LogInformation("Createing bulk resources.");
+                _logger.LogInformation("Initiating bulk creation of {Count} resources.", resources.Count);
                 await _resourceRepository.BulkCreateResourcesAsync(resources);
+                _logger.LogInformation("Successfully created {Count} resources in bulk.", resources.Count);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error creating {#resources} resources", resources.Count.ToString());
+                _logger.LogError(ex, "Error occurred during bulk resource creation. Count: {Count}", resources.Count);
                 throw;
             }
         }
 
         public async Task<List<OptionDto>?> GetRoleOptionsDropDownAsync()
         {
-            return await _resourceRepository.GetRoleOptionsDropDownAsync();
+            try
+            {
+                _logger.LogInformation("Fetching role options for dropdown.");
+                var options = await _resourceRepository.GetRoleOptionsDropDownAsync();
+                _logger.LogInformation("Successfully fetched {Count} role options.", options?.Count ?? 0);
+                return options;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while fetching role options for dropdown.");
+                throw;
+            }
         }
     }
 }

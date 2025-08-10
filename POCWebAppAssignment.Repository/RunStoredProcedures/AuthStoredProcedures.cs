@@ -1,39 +1,36 @@
 ﻿using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
+using POCWebAppAssignment.Repository.Helpers;
 using POCWebAppAssignment.Interfaces.Authentication;
-using POCWebAppAssignment.Model;
 using POCWebAppAssignment.Model.AuthDTOs;
-using POCWebAppAssignment.Model.DTOs;
-using Serilog;
-using System;
-using System.Collections.Generic;
 using System.Data;
-using System.Security.Cryptography.Pkcs;
-using System.Text.Json;
-using System.Threading.Tasks;
 
 namespace POCWebAppAssignment.Repository.RunStoredProcedures
 {
-    public class AuthStoredProcedures: IAuthStoredProcedures
+    public class AuthStoredProcedures : IAuthStoredProcedures
     {
         private readonly string _connectionString;
+
         public AuthStoredProcedures(IConfiguration configuration)
         {
             _connectionString = configuration.GetConnectionString("DB_Connection");
         }
 
-        public async Task<UserWithRolesDto?> GetUserWithRolesAsync(string UserNameOrEmail)
+        public async Task<UserWithRolesDto?> GetUserWithRolesAsync(string userNameOrEmail)
         {
-            using var conn = new SqlConnection(_connectionString);
-            await conn.OpenAsync();
+            var parameters = new List<SqlParameter>
+            {
+                SqlHelper.CreateSqlParameter("@EmailIdOrUsername", userNameOrEmail)
+            };
 
+            using var conn = new SqlConnection(_connectionString);
             using var cmd = new SqlCommand("sp_AuthenticateUser", conn)
             {
                 CommandType = CommandType.StoredProcedure
             };
+            cmd.Parameters.AddRange(parameters.ToArray());
 
-            cmd.Parameters.AddWithValue("@EmailIdOrUsername", UserNameOrEmail);
-
+            await conn.OpenAsync();
             using var reader = await cmd.ExecuteReaderAsync();
 
             if (!await reader.ReadAsync()) return null;
@@ -42,7 +39,7 @@ namespace POCWebAppAssignment.Repository.RunStoredProcedures
             {
                 UserId = reader.GetInt32(0),
                 UserName = reader.GetString(1),
-                PasswordHash = reader.GetString(2),
+                PasswordHash = reader.GetString(2)
             };
 
             if (await reader.NextResultAsync())
@@ -58,30 +55,18 @@ namespace POCWebAppAssignment.Repository.RunStoredProcedures
 
         public async Task<int?> CreateUserAsync(SignupDto signup)
         {
-            using var conn = new SqlConnection(_connectionString);
-            using var command = new SqlCommand("sp_CreateUser", conn)
+            var parameters = new List<SqlParameter>
             {
-                CommandType = CommandType.StoredProcedure
+                SqlHelper.CreateSqlParameter("@UserName", signup.UserName),
+                SqlHelper.CreateSqlParameter("@EmailId", signup.Email),
+                SqlHelper.CreateSqlParameter("@PasswordHash", signup.Password),
+                SqlHelper.CreateSqlParameter("@RoleId", signup.RoleId),
+                new SqlParameter("@UserId", SqlDbType.Int) { Direction = ParameterDirection.Output }
             };
 
-            command.Parameters.AddWithValue("@UserName", signup.UserName);
-            command.Parameters.AddWithValue("@EmailId", signup.Email);
-            command.Parameters.AddWithValue("@PasswordHash", signup.Password);
-            command.Parameters.AddWithValue("@RoleId", signup.RoleId);
+            await SqlHelper.ExecuteStoredProcedureWithOutputAsync(_connectionString, "sp_CreateUser", parameters);
 
-            var outputParam = new SqlParameter("@UserId", SqlDbType.Int)
-            {
-                Direction = ParameterDirection.Output
-            };
-
-            command.Parameters.Add(outputParam);
-
-            await conn.OpenAsync();
-            await command.ExecuteNonQueryAsync();
-
-            return outputParam.Value != DBNull.Value ? (int?)outputParam.Value : null;
+            return parameters.First(p => p.ParameterName == "@UserId").Value is int id ? id : null;
         }
-
-
     }
 }

@@ -10,6 +10,6 @@ namespace POCWebAppAssignment.Interfaces.Authentication
     public interface IAuthRepository
     {
         Task<UserWithRolesDto?> GetUserWithRolesAsync(string UserName);
-        Task<int?> CreateUserAaync(SignupDto signup);
+        Task<int?> CreateUserAsync(SignupDto signup);
     }
 }
