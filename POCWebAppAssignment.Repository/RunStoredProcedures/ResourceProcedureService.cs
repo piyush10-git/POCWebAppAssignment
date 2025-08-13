@@ -20,7 +20,7 @@ namespace POCWebAppAssignment.Repository.RunStoredProcedures
 
         public async Task<IEnumerable<Resource>> GetAll()
         {
-            var table = await SqlHelper.ExecuteDataTableAsync(_connectionString, "GetAllResources1");
+            var table = await SqlHelper.ExecuteDataTableAsync(_connectionString, "GetAllResources");
 
             var response = new List<Resource>();
             foreach (DataRow row in table.Rows)
@@ -61,7 +61,7 @@ namespace POCWebAppAssignment.Repository.RunStoredProcedures
                 SqlHelper.CreateTvpParameter("@ProjectIds", SqlHelper.CreateIdDataTable(details.ProjectAllocation), "dbo.IdList")
             };
 
-            await SqlHelper.ExecuteStoredProcedureWithOutputAsync(_connectionString, "CreateResource1", parameters);
+            await SqlHelper.ExecuteStoredProcedureWithOutputAsync(_connectionString, "CreateResource", parameters);
 
             return (int)parameters.First(p => p.ParameterName == "@EmpId").Value!;
         }
@@ -73,7 +73,7 @@ namespace POCWebAppAssignment.Repository.RunStoredProcedures
                 SqlHelper.CreateSqlParameter("@EmpId", empId)
             };
 
-            return await SqlHelper.DeserializeJsonFromReaderAsync<ResourceDetailsDto>(_connectionString, "GetResourceById1", parameters);
+            return await SqlHelper.DeserializeJsonFromReaderAsync<ResourceDetailsDto>(_connectionString, "GetResourceById", parameters);
         }
 
         public async Task<bool> CheckEmailExists(string emailId)
@@ -124,7 +124,7 @@ namespace POCWebAppAssignment.Repository.RunStoredProcedures
         SqlHelper.CreateTvpParameter("@ProjectIds", SqlHelper.CreateIdDataTable(details.ProjectAllocation), "dbo.IdList")
     };
 
-            await SqlHelper.ExecuteNonQueryAsync(_connectionString, "UpdateResource1", parameters);
+            await SqlHelper.ExecuteNonQueryAsync(_connectionString, "UpdateResource", parameters);
         }
 
         public async Task DeleteResource(int empId)
@@ -134,7 +134,7 @@ namespace POCWebAppAssignment.Repository.RunStoredProcedures
         SqlHelper.CreateSqlParameter("@EmpId", empId)
     };
 
-            await SqlHelper.ExecuteNonQueryAsync(_connectionString, "DeleteResourceById1", parameters);
+            await SqlHelper.ExecuteNonQueryAsync(_connectionString, "DeleteResourceById", parameters);
         }
         public async Task DeleteResourcesByEmpIdList(IEnumerable<int> empIds)
         {
@@ -144,12 +144,12 @@ namespace POCWebAppAssignment.Repository.RunStoredProcedures
         SqlHelper.CreateTvpParameter("@EmpIds", tvp, "EmpIdList")
     };
 
-            await SqlHelper.ExecuteNonQueryAsync(_connectionString, "DeleteResourcesByEmpIdList1", parameters);
+            await SqlHelper.ExecuteNonQueryAsync(_connectionString, "DeleteResourcesByEmpIdList", parameters);
         }
 
         public async Task<DropdownResponseDto> GetDropdownData()
         {
-            var result = await SqlHelper.DeserializeJsonFromReaderAsync<DropdownResponseDto>(_connectionString, "GetDropdownDataJson1");
+            var result = await SqlHelper.DeserializeJsonFromReaderAsync<DropdownResponseDto>(_connectionString, "GetDropdownDataJson");
 
             return result ?? new DropdownResponseDto();
         }
@@ -170,7 +170,7 @@ namespace POCWebAppAssignment.Repository.RunStoredProcedures
     };
 
             using var connection = new SqlConnection(_connectionString);
-            using var command = new SqlCommand("BulkUpdateResources1", connection)
+            using var command = new SqlCommand("BulkUpdateResources", connection)
             {
                 CommandType = CommandType.StoredProcedure
             };
@@ -237,7 +237,7 @@ namespace POCWebAppAssignment.Repository.RunStoredProcedures
         SqlHelper.CreateTvpParameter("@Projects", projectsTable, "dbo.TempProjectAllocation")
     };
 
-            await SqlHelper.ExecuteNonQueryAsync(_connectionString, "sp_BulkImport2", parameters);
+            await SqlHelper.ExecuteNonQueryAsync(_connectionString, "sp_BulkImport", parameters);
         }
 
         public async Task<List<OptionDto>?> GetRoleOptionsDropDownAsync()
