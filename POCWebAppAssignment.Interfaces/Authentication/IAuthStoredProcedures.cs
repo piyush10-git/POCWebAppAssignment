@@ -1,15 +1,14 @@
 ﻿using POCWebAppAssignment.Model.AuthDTOs;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace POCWebAppAssignment.Interfaces.Authentication
 {
     public interface IAuthStoredProcedures
     {
-        Task<UserWithRolesDto?> GetUserWithRolesAsync(string UserName);
-        Task<int?> CreateUserAsync(SignupDto signup);
+        Task<UserDto?> AuthenticateUserAsync(string usernameOrEmail);
+        Task ChangePasswordAsync(int userId, string passwordHash);
+        Task<int?> CreateUserAsync(CreateUserDto dto);
+        Task RevokeAccessAsync(int userId);
+        Task UpdateLastLoginAsync(int userId);
+        Task UpdateTempCredentialsAsync(int userId, string passwordHash, DateTime expiry);
     }
 }

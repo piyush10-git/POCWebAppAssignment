@@ -1,12 +1,13 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using POCWebAppAssignment.API.Utilities;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using POCWebAppAssignment.Interfaces.Authentication;
 using POCWebAppAssignment.Model.AuthDTOs;
 
-namespace POCWebAppAssignment.API.Controllers
+namespace POCWebAppAssignment.Controllers
 {
-    [Route("api/admin")]
     [ApiController]
+    [Route("api/admin")]
+    //[Authorize(Roles = "Admin")] // only admins can access
     public class AdminController : ControllerBase
     {
         private readonly IAuthService _authService;
@@ -16,57 +17,42 @@ namespace POCWebAppAssignment.API.Controllers
             _authService = authService;
         }
 
-        [HttpPost("provision-user")]
-        public async Task<IActionResult> CreateUser([FromBody] LoginDto login)
+        /// <summary>
+        /// Create new user (provision)
+        /// </summary>
+        [HttpPost("create-user")]
+        public async Task<IActionResult> CreateUser([FromBody] CreateUserDto dto)
         {
-            try
-            {
-                return Ok();
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500);
-            }
+            var userId = await _authService.SignUpAsync(dto);
+            if (userId == null) return BadRequest("Failed to create user.");
+
+            return Ok(new { UserId = userId });
         }
 
-
-        [HttpPost("resend-creds")]
-        public async Task<IActionResult> ResendCredentials([FromBody] SignupDto signup)
+        /// <summary>
+        /// Provision temporary access (regenerate credentials)
+        /// </summary>
+        [HttpPost("provision/{userId}")]
+        public async Task<IActionResult> ProvisionAccess(int userId, [FromQuery] int expiryHours = 24)
         {
-            try
-            {
-                return Ok();
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500);
-            }
+            // Generate random temporary password (simple example)
+            var tempPassword = Guid.NewGuid().ToString("N").Substring(0, 10) + "!";
+
+            var success = await _authService.ProvisionAccessAsync(userId, tempPassword, TimeSpan.FromHours(expiryHours));
+            if (!success) return BadRequest("Failed to provision credentials.");
+
+            // In production: send email/SMS with tempPassword here
+            return Ok(new { Message = "Temporary credentials created.", TempPassword = tempPassword });
         }
 
-        [HttpDelete("user/{id}")]
-        public async Task<IActionResult> RevokeUserAccess(int id)
+        /// <summary>
+        /// Revoke user access
+        /// </summary>
+        [HttpPost("revoke/{userId}")]
+        public async Task<IActionResult> RevokeAccess(int userId)
         {
-            try
-            {
-                return Ok();
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500);
-            }
-        }
-
-        [HttpPatch("user-role")]
-        public async Task<IActionResult> UpdateUserAccess([FromBody] int val)
-        {
-            try
-            {
-                return Ok();
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500);
-            }
+            await _authService.RevokeAccessAsync(userId);
+            return Ok("Access revoked successfully.");
         }
     }
 }

@@ -15,56 +15,34 @@ namespace POCWebAppAssignment.Repository.Repositories
             _logger = logger;
         }
 
-        public async Task<UserWithRolesDto?> GetUserWithRolesAsync(string username)
+        public async Task<UserDto?> AuthenticateUserAsync(string usernameOrEmail)
         {
-            try
-            {
-                _logger.LogInformation("Fetching user with roles for username/email: {Username}", username);
-
-                var user = await _authStoredProcedure.GetUserWithRolesAsync(username);
-
-                if (user == null)
-                {
-                    _logger.LogWarning("No user found for: {Username}", username);
-                }
-                else
-                {
-                    _logger.LogInformation("User with roles fetched successfully for: {Username}", username);
-                }
-
-                return user;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error occurred while fetching user with roles for: {Username}", username);
-                throw;
-            }
+            return await _authStoredProcedure.AuthenticateUserAsync(usernameOrEmail);
         }
 
-        public async Task<int?> CreateUserAsync(SignupDto signup)
+        public async Task ChangePasswordAsync(int userId, string passwordHash)
         {
-            try
-            {
-                _logger.LogInformation("Attempting to create user with username: {Username}", signup.UserName);
+            await _authStoredProcedure.ChangePasswordAsync(userId, passwordHash);
+        }
 
-                var userId = await _authStoredProcedure.CreateUserAsync(signup);
+        public async Task<int?> CreateUserAsync(CreateUserDto dto)
+        {
+            return await _authStoredProcedure.CreateUserAsync(dto);
+        }
 
-                if (userId == null)
-                {
-                    _logger.LogWarning("User creation returned null for username: {Username}", signup.UserName);
-                }
-                else
-                {
-                    _logger.LogInformation("User created successfully with ID: {UserId} for username: {Username}", userId, signup.UserName);
-                }
+        public async Task RevokeAccessAsync(int userId)
+        {
+            await _authStoredProcedure.RevokeAccessAsync(userId);
+        }
 
-                return userId;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error occurred while creating user: {Username}", signup.UserName);
-                throw;
-            }
+        public async Task UpdateLastLoginAsync(int userId)
+        {
+            await _authStoredProcedure.UpdateLastLoginAsync(userId);
+        }
+
+        public async Task UpdateTempCredentialsAsync(int userId, string passwordHash, DateTime expiry)
+        {
+            await _authStoredProcedure.UpdateTempCredentialsAsync(userId, passwordHash, expiry);
         }
     }
 }

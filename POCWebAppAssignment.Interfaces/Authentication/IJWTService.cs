@@ -4,7 +4,6 @@ namespace POCWebAppAssignment.Interfaces.Authentication
 {
     public interface IJWTService
     {
-        string GenerateJwtToken(UserWithRolesDto user);
-        string HashPassword(string password);
+        string GenerateJwtToken(UserDto user);
     }
 }

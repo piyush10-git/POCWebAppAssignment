@@ -4,7 +4,10 @@ namespace POCWebAppAssignment.Interfaces.Authentication
 {
     public interface IAuthService
     {
+        Task<bool> ChangePasswordAsync(int userId, string oldPassword, string newPassword);
         Task<LoginResultDto> LoginAsync(LoginDto loginCredentials);
-        Task<int?> SignUpAsync(SignupDto signup);
+        Task<bool> ProvisionAccessAsync(int userId, string tempPassword, TimeSpan expiry);
+        Task RevokeAccessAsync(int userId);
+        Task<int?> SignUpAsync(CreateUserDto signup);
     }
 }

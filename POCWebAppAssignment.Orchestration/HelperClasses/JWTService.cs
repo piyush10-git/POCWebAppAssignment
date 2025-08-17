@@ -1,57 +1,53 @@
-﻿using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using POCWebAppAssignment.Model.AuthDTOs;
 using POCWebAppAssignment.Interfaces.Authentication;
-using System;
-using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
 using System.Security.Claims;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace POCWebAppAssignment.Orchestration.HelperClasses
 {
     public class JWTService : IJWTService
     {
-        string jwtKey, issuer, audience, expiresIn;
+        private readonly string _jwtKey;
+        private readonly string _issuer;
+        private readonly string _audience;
+        private readonly int _expiresInMinutes;
+
         public JWTService(IConfiguration config)
         {
-            jwtKey = config["Jwt:Key"] ?? throw new InvalidOperationException("JWT key not configured.");
-            issuer = config["Jwt:Issuer"] ?? throw new InvalidOperationException("JWT issuer not configured.");
-            audience = config["Jwt:Audience"] ?? throw new InvalidOperationException("JWT audience not configured.");
-            expiresIn = config["Jwt:ExpiresInMinutes"] ?? throw new InvalidOperationException("JWT expiration not configured.");
+            _jwtKey = config["Jwt:Key"] ?? throw new InvalidOperationException("JWT key not configured.");
+            _issuer = config["Jwt:Issuer"] ?? throw new InvalidOperationException("JWT issuer not configured.");
+            _audience = config["Jwt:Audience"] ?? throw new InvalidOperationException("JWT audience not configured.");
+
+            if (!int.TryParse(config["Jwt:ExpiresInMinutes"], out _expiresInMinutes))
+            {
+                throw new InvalidOperationException("Invalid JWT expiration configuration.");
+            }
         }
 
-        public string GenerateJwtToken(UserWithRolesDto user)
+        public string GenerateJwtToken(UserDto user)
         {
-            var claims = new List<Claim> {
-                new Claim("UserName", user.UserName),
-                new Claim("UserId", user.UserId.ToString())
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString()),
+                new Claim(ClaimTypes.Name, user.UserName),
+                new Claim(ClaimTypes.Role, user.RoleName)
             };
 
-            claims.AddRange(user.Roles.Select(role => new Claim("role", role)));
-
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey));
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtKey));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
             var token = new JwtSecurityToken(
-                issuer: issuer,
-                audience: audience,
+                issuer: _issuer,
+                audience: _audience,
                 claims: claims,
-                expires: DateTime.UtcNow.AddMinutes(Convert.ToDouble(expiresIn)),
+                expires: DateTime.UtcNow.AddMinutes(_expiresInMinutes),
                 signingCredentials: creds
             );
 
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
-
-        public string HashPassword(string password)
-        {
-            var hasher = new PasswordHasher<ApplicationUser>();
-            return hasher.HashPassword(new ApplicationUser(), password);
-        }
-
     }
 }
