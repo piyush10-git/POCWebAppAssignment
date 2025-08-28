@@ -4,7 +4,6 @@ using POCWebAppAssignment.Interfaces;
 using POCWebAppAssignment.Interfaces.Authentication;
 using POCWebAppAssignment.Repository.Repositories;
 using POCWebAppAssignment.Repository.RunStoredProcedures;
-using Microsoft.AspNetCore.Authentication;
 using Serilog;
 using POCWebAppAssignment.Orchestration.HelperClasses;
 

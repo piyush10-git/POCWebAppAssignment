@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Data.SqlClient;
 using POCWebAppAssignment.API.Utilities;
 using POCWebAppAssignment.Interfaces;
@@ -388,6 +389,19 @@ namespace POCWebAppAssignment.API.Controllers
             }
         }
 
+        [HttpGet]
+        public async Task<IActionResult> GetResources([FromQuery] GridQueryParameters query)
+        {
+            try
+            {
+                var result = await _resourceService.GetResourcesAsync(query);
+                return Ok(new ApiResponse<PagedResult<Resource>>(true, "Role options retrieved successfully.", result));
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new ApiResponse<string>(false, "Failed to retrieve data", null));
+            }
+        }
 
 
     }

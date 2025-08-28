@@ -213,5 +213,111 @@ namespace POCWebAppAssignment.Orchestration.Services
                 throw;
             }
         }
+
+        public async Task<PagedResult<Resource>> GetResourcesAsync(GridQueryParameters query)
+        {
+            
+            var resources = await _resourceRepository.GetAllResourcesAsync();
+            var filtered = resources;
+
+            // Filtering
+            if (query.Filters != null && query.Filters.Count > 0)
+            {
+                foreach (var filter in query.Filters)
+                {
+                    if (!string.IsNullOrWhiteSpace(filter.Value))
+                    {
+                        filtered = filtered.Where(r =>
+                        {
+                            switch (filter.Field.ToLower())
+                            {
+                                case "empid":
+                                    return r.EmpId.HasValue && r.EmpId.Value.ToString() == filter.Value;
+                                case "resourcename":
+                                    return r.ResourceName?.Contains(filter.Value, StringComparison.OrdinalIgnoreCase) == true;
+                                case "designation":
+                                    return r.Designation?.Contains(filter.Value, StringComparison.OrdinalIgnoreCase) == true;
+                                case "reportingto":
+                                    return r.ReportingTo?.Contains(filter.Value, StringComparison.OrdinalIgnoreCase) == true;
+                                case "billable":
+                                    return bool.TryParse(filter.Value, out var billableVal) && r.Billable == billableVal;
+                                case "technologyskill":
+                                    return r.TechnologySkill?.Contains(filter.Value, StringComparison.OrdinalIgnoreCase) == true;
+                                case "projectallocation":
+                                    return r.ProjectAllocation?.Contains(filter.Value, StringComparison.OrdinalIgnoreCase) == true;
+                                case "location":
+                                    return r.Location?.Contains(filter.Value, StringComparison.OrdinalIgnoreCase) == true;
+                                case "emailid":
+                                    return r.EmailId?.Contains(filter.Value, StringComparison.OrdinalIgnoreCase) == true;
+                                case "ctedoj":
+                                    return DateOnly.TryParse(filter.Value, out var doj) && r.CteDoj == doj;
+                                case "remarks":
+                                    return r.Remarks?.Contains(filter.Value, StringComparison.OrdinalIgnoreCase) == true;
+                                default:
+                                    return true;
+                            }
+                        });
+                    }
+                }
+            }
+
+            // Sorting
+            if (query.Sorts != null && query.Sorts.Count > 0)
+            {
+                IOrderedEnumerable<Resource>? ordered = null;
+
+                foreach (var sort in query.Sorts)
+                {
+                    Func<Resource, object?> keySelector = sort.Field.ToLower() switch
+                    {
+                        "empid" => r => r.EmpId,
+                        "resourcename" => r => r.ResourceName,
+                        "designation" => r => r.Designation,
+                        "reportingto" => r => r.ReportingTo,
+                        "billable" => r => r.Billable,
+                        "technologyskill" => r => r.TechnologySkill,
+                        "projectallocation" => r => r.ProjectAllocation,
+                        "location" => r => r.Location,
+                        "emailid" => r => r.EmailId,
+                        "ctedoj" => r => r.CteDoj,
+                        "remarks" => r => r.Remarks,
+                        _ => r => null
+                    };
+
+                    if (ordered == null)
+                    {
+                        ordered = sort.Direction.Equals("asc", StringComparison.OrdinalIgnoreCase)
+                            ? filtered.OrderBy(keySelector)
+                            : filtered.OrderByDescending(keySelector);
+                    }
+                    else
+                    {
+                        ordered = sort.Direction.Equals("asc", StringComparison.OrdinalIgnoreCase)
+                            ? ordered.ThenBy(keySelector)
+                            : ordered.ThenByDescending(keySelector);
+                    }
+                }
+
+                if (ordered != null) filtered = ordered;
+            }
+
+            // Paging
+            var totalCount = filtered.Count();
+            var data = filtered
+                .Skip((query.PageNumber - 1) * query.PageSize)
+                .Take(query.PageSize)
+                .ToList();
+
+            return new PagedResult<Resource>
+            {
+                Data = data,
+                TotalCount = totalCount,
+                PageNumber = query.PageNumber,
+                PageSize = query.PageSize
+            };
+        }
+
+
+
     }
 }

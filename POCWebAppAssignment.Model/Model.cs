@@ -10,9 +10,8 @@
         public string TechnologySkill { get; set; }
         public string ProjectAllocation { get; set; }
         public string Location { get; set; }
-        public string EmailId { get; set; }
+        public string EmailId { get; set; } = string.Empty;
         public DateOnly CteDoj { get; set; }
         public string? Remarks { get; set; }
     }
-
 }

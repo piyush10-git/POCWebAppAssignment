@@ -231,11 +231,11 @@ namespace POCWebAppAssignment.Repository.RunStoredProcedures
             }
 
             var parameters = new List<SqlParameter>
-    {
-        SqlHelper.CreateTvpParameter("@Employees", employeesTable, "dbo.TempEmployee1"),
-        SqlHelper.CreateTvpParameter("@Skills", skillsTable, "dbo.TempEmployeeSkills"),
-        SqlHelper.CreateTvpParameter("@Projects", projectsTable, "dbo.TempProjectAllocation")
-    };
+            {
+                SqlHelper.CreateTvpParameter("@Employees", employeesTable, "dbo.TempEmployee1"),
+                SqlHelper.CreateTvpParameter("@Skills", skillsTable, "dbo.TempEmployeeSkills"),
+                SqlHelper.CreateTvpParameter("@Projects", projectsTable, "dbo.TempProjectAllocation")
+            };
 
             await SqlHelper.ExecuteNonQueryAsync(_connectionString, "sp_BulkImport", parameters);
         }
