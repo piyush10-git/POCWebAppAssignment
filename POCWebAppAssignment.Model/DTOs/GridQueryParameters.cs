@@ -17,14 +17,14 @@ namespace POCWebAppAssignment.Model.DTOs
 
     public class ColumnFilter
     {
-        public string Field { get; set; } = string.Empty;   // Column name
-        public string Operator { get; set; } = "contains";  // eq, contains, startswith, etc.
-        public string Value { get; set; } = string.Empty;   // Value to match
+        public string Field { get; set; } = string.Empty;
+        public string Operator { get; set; } = "contains";
+        public string Value { get; set; } = string.Empty;
     }
     public class ColumnSort
     {
-        public string Field { get; set; } = string.Empty;   // Column name
-        public string Direction { get; set; } = "asc";      // "asc" or "desc"
+        public string Field { get; set; } = string.Empty;
+        public string Direction { get; set; } = "asc";
     }
 
 
